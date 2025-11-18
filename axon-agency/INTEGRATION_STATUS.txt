@@ -1,0 +1,85 @@
+============================================================
+INTEGRACIÓN AXON CORE ↔ REPLIT ↔ OPENAI - ESTADO ACTUAL
+============================================================
+
+📊 Tests de Integración: 6/6 PASSING ✅
+
+✅ PASS: Local Health      - Backend Replit funcionando
+✅ PASS: Dev Token         - Autenticación JWT OK
+✅ PASS: Local Catalog     - Endpoints locales OK
+✅ PASS: Axon Core Direct  - Conexión directa establecida
+✅ PASS: Axon Core Proxy   - Proxy funcionando correctamente
+✅ PASS: Axon Core Catalog - Catálogo de Axon Core accesible
+
+🎯 Estado: INTEGRACIÓN COMPLETADA ✅
+   El sistema está completamente integrado y funcionando.
+
+🔗 Configuración Activa:
+
+📡 URLs en Producción:
+   - Axon Core (túnel permanente): https://api-axon88.algorithmicsai.com
+   - Backend Local: http://localhost:8080
+   - Frontend Local: http://localhost:5000
+   - Production (futuro): https://axon-agency.replit.app
+
+🌐 Rutas del Túnel Cloudflare:
+   - /api/* → Axon Core (puerto 8081)
+   - /axon88/* → Inventario API (puerto 8093)
+
+🚀 Funcionalidades Activas:
+
+✅ Chat AI con OpenAI - Tu frontend → Replit → Axon Core → OpenAI
+✅ Control Remoto - Gestiona servicios de Axon 88 desde la UI
+✅ Comandos Seguros - Terminal remoto con whitelist
+✅ Métricas en Vivo - CPU, RAM, GPU de Axon 88 en tiempo real
+✅ Workflows n8n - Dispara automatizaciones desde la interfaz
+✅ Autopilots - Agentes IA con acceso a tu infraestructura
+✅ Comunicación WebSocket - Real-time bidireccional
+
+📦 Endpoints Disponibles:
+
+Axon Core (vía túnel):
+  - GET  /api/health          - Health check
+  - GET  /api/catalog         - Capacidades del sistema
+  - POST /api/agent/chat      - Chat con IA
+  - POST /api/media/upload    - Upload de medios
+  - POST /api/posts/draft     - Crear borradores
+  - GET  /api/conversations   - Conversaciones
+  - GET  /api/autopilots      - Gestión de autopilots
+  - GET  /api/campaigns       - Campañas
+  - GET  /api/rag             - RAG system
+
+Backend Replit:
+  - GET  /api/health                - Health check local
+  - GET  /api/catalog               - Capacidades locales
+  - POST /api/auth/dev/token        - Obtener token JWT
+  - POST /api/agent/chat            - Chat con IA (local)
+  - GET  /api/metrics               - Métricas del sistema
+
+Proxy Axon Core (vía Replit):
+  - GET  /api/axon-core/health      - Verificar conectividad
+  - GET  /api/axon-core/catalog     - Obtener catálogo
+  - POST /api/axon-core/chat        - Chat con LLM
+  - POST /api/axon-core/command     - Ejecutar comando
+  - GET  /api/axon-core/services    - Listar servicios
+  - GET  /api/axon-core/metrics     - Métricas de Axon 88
+  - POST /api/axon-core/workflow    - Disparar workflow n8n
+
+📝 Comandos Útiles:
+
+# Ejecutar tests de integración
+make integration
+
+# Configurar Axon Core (ya configurado)
+make setup-axon-core
+
+# Ver logs de integración
+tail -f logs/integration.log
+
+# Reiniciar servicios
+make backend
+make frontend
+
+============================================================
+ÚLTIMA ACTUALIZACIÓN: 2025-11-12 06:42:00 UTC
+============================================================

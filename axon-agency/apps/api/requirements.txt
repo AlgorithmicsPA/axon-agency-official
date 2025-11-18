@@ -1,0 +1,51 @@
+# Web Framework
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-socketio==5.11.4
+python-multipart==0.0.16
+aiofiles==24.1.0
+
+# Database
+sqlmodel==0.0.22
+sqlalchemy==2.0.35
+alembic==1.13.3
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# HTTP Client
+httpx==0.27.2
+
+# AI APIs
+openai==1.54.0
+
+# Templates
+jinja2==3.1.4
+
+# Jobs & Queue
+redis==5.2.0
+rq==2.0.0
+
+# Utilities
+python-dotenv==1.0.1
+pydantic-settings==2.6.1
+loguru==0.7.2
+
+# RAG & Embeddings
+faiss-cpu==1.8.0
+sentence-transformers==2.2.2
+langchain==0.1.0
+langchain-community==0.0.10
+pypdf==3.17.4
+beautifulsoup4==4.12.3
+lxml==5.1.0
+
+# Jobs
+apscheduler==3.10.4
+
+# Payment Processing
+stripe==13.2.0
+
+# MongoDB
+motor==3.7.1

@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: axon-postgres
+    environment:
+      POSTGRES_DB: axon
+      POSTGRES_USER: axon
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-in-production}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U axon"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: axon-redis
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend API (FastAPI)
+  axon-agency-api:
+    build:
+      context: ./axon-agency/apps/api
+      dockerfile: Dockerfile
+    container_name: axon-agency-api
+    ports:
+      - "8080:8080"
+    environment:
+      # Core
+      BIND: 0.0.0.0
+      PORT: 8080
+      PRODUCTION_MODE: ${PRODUCTION_MODE:-true}
+      DEV_MODE: ${DEV_MODE:-false}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5000}
+      
+      # Database
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://axon:change-me-in-production@postgres:5432/axon}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      STORAGE_ROOT: ./storage
+      
+      # JWT Auth
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-generate-32-random-chars}
+      JWT_ISS: ${JWT_ISS:-axon}
+      JWT_AUD: ${JWT_AUD:-control}
+      JWT_EXPIRATION_MINUTES: ${JWT_EXPIRATION_MINUTES:-1440}
+      
+      # LLM Providers (optional)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      
+      # MongoDB (WhatsApp Sales Agent - optional)
+      MONGODB_URI: ${MONGODB_URI:-}
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME:-whatsapp_sales_prod}
+      
+      # Integrations (all optional)
+      N8N_WHATSAPP_DEPLOY_WEBHOOK_URL: ${N8N_WHATSAPP_DEPLOY_WEBHOOK_URL:-}
+      AYRSHARE_API_KEY: ${AYRSHARE_API_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+    volumes:
+      - api_storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Frontend (Next.js)
+  axon-agency-web:
+    build:
+      context: ./axon-agency/apps/web
+      dockerfile: Dockerfile
+    container_name: axon-agency-web
+    ports:
+      - "5000:5000"
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8080}
+      NEXT_PUBLIC_REPLIT_STUDIO_URL: ${NEXT_PUBLIC_REPLIT_STUDIO_URL:-}
+    depends_on:
+      axon-agency-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  api_storage:
+    driver: local

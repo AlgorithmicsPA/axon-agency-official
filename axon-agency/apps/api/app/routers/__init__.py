@@ -1,0 +1,43 @@
+"""Router modules for AXON Agency API."""
+
+from . import (
+    health,
+    catalog,
+    metrics,
+    auth,
+    agent,
+    media,
+    posts,
+    conversations,
+    integrations,
+    autopilots,
+    rag,
+    campaigns,
+    services,
+    axon_core,
+    memory,
+    training,
+    evaluation,
+    meta_agent,
+)
+
+__all__ = [
+    "health",
+    "catalog",
+    "metrics",
+    "auth",
+    "agent",
+    "media",
+    "posts",
+    "conversations",
+    "integrations",
+    "autopilots",
+    "rag",
+    "campaigns",
+    "services",
+    "axon_core",
+    "memory",
+    "training",
+    "evaluation",
+    "meta_agent",
+]

@@ -1,0 +1,71 @@
+modules = ["python-3.11", "nodejs-20", "postgresql-16"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+packages = ["libxcrypt", "xcodebuild", "zlib"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "axon-web"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "axon-agency-api"
+
+[[workflows.workflow]]
+name = "axon-web"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd axon-agency/apps/web && npm run dev"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "axon-agency-api"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd axon-agency/apps/api && uvicorn app.main:socket_app --reload --host 0.0.0.0 --port 8080"
+waitForPort = 8080
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3002
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 36237
+externalPort = 4200
+
+[[ports]]
+localPort = 38421
+externalPort = 3001
+
+[[ports]]
+localPort = 42209
+externalPort = 3003

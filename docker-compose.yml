@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  axon-core:
+    build: .
+    container_name: axon-core
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./axon88_audit.json:/app/axon88_audit.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
