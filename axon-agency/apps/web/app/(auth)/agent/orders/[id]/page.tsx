@@ -524,13 +524,13 @@ export default function OrderDetailPage() {
             orderNumber={order.order_number}
             tipoProducto={order.tipo_producto}
             deliverableGenerado={deliverableData?.deliverable_generado || false}
-            deliverableMetadata={deliverableData?.deliverable_metadata}
-            deliverableGeneradoEn={deliverableData?.deliverable_generado_en}
+            deliverableMetadata={deliverableData?.deliverable_metadata ?? undefined}
+            deliverableGeneradoEn={deliverableData?.deliverable_generado_en ?? undefined}
           />
 
           <AdminOnly>
             <AgentArtifactsCard 
-              deliverableMetadata={deliverableData?.deliverable_metadata}
+              deliverableMetadata={deliverableData?.deliverable_metadata ?? undefined}
             />
           </AdminOnly>
 
@@ -591,7 +591,7 @@ export default function OrderDetailPage() {
           </AdminOnly>
 
           <AdminOnly>
-            <AgentBlueprintCard agentBlueprint={order.agent_blueprint} />
+            <AgentBlueprintCard agentBlueprint={order.agent_blueprint as any} />
           </AdminOnly>
 
           <AdminOnly>

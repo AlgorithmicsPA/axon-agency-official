@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/Sidebar";
-import { Topbar } from "@/components/Topbar";
-import { ToastProvider } from "@/components/Toast";
-import { ConfirmProvider } from "@/components/ConfirmModal";
-import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AXON Agency - AI Platform",
-  description: "Full-stack IA Agency Platform",
+  title: "Axon Agency — Inteligencia Artificial para tu Negocio",
+  description: "Automatización, agentes inteligentes, WhatsApp AI, pipelines N8N y soluciones IA listas para producción.",
 };
 
 export default function RootLayout({
@@ -21,21 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="dark">
-      <body className={inter.className}>
-        <AuthProvider>
-          <ToastProvider>
-            <ConfirmProvider>
-              <div className="flex h-screen">
-                <Sidebar />
-                <div className="flex-1 flex flex-col">
-                  <Topbar />
-                  <main className="flex-1 overflow-auto p-6">{children}</main>
-                </div>
-              </div>
-            </ConfirmProvider>
-          </ToastProvider>
-        </AuthProvider>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
