@@ -4,14 +4,24 @@ const VERIFY_TOKEN =
   process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN ?? "axon88webhook";
 
 /**
- * WhatsApp Webhook Brain
+ * ============================================================
+ * WHATSAPP WEBHOOK BRAIN
+ * ============================================================
  * 
- * Processes incoming WhatsApp messages:
- * 1. Normalizes message data from Meta webhook payload
- * 2. Sends to OpenAI for intelligent response generation
- * 3. Returns reply via WhatsApp Cloud API
+ * Recibe mensajes desde WhatsApp Cloud API (Meta).
+ * Llama a OpenAI (gpt-4o-mini) para generar respuesta inteligente.
+ * Envía la respuesta de vuelta al usuario usando WHATSAPP_CLOUD_ACCESS_TOKEN.
  * 
- * Always responds 200 to Meta (failures logged internally)
+ * El token se obtiene desde process.env y puede definirse en:
+ * - Replit Secrets (recomendado para producción)
+ * - apps/web/.env.local (desarrollo local)
+ * 
+ * Configuración de variables:
+ * 1. OPENAI_API_KEY → para generar respuestas
+ * 2. WHATSAPP_CLOUD_ACCESS_TOKEN → para enviar mensajes
+ * 3. WHATSAPP_WEBHOOK_VERIFY_TOKEN → para verificar webhook (por defecto: "axon88webhook")
+ * 
+ * ============================================================
  */
 
 /**
@@ -76,8 +86,18 @@ async function sendWhatsAppMessage(
   text: string
 ): Promise<void> {
   const token = process.env.WHATSAPP_CLOUD_ACCESS_TOKEN;
+  
+  // DEBUG: Log token availability (length only, for security)
+  console.log(
+    "[ENV DEBUG] WHATSAPP_CLOUD_ACCESS_TOKEN length:",
+    token ? token.length : "NONE"
+  );
+  
   if (!token) {
     console.error("[WhatsApp Brain] ❌ WHATSAPP_CLOUD_ACCESS_TOKEN not set");
+    console.error(
+      "[WhatsApp Brain] ⚠️ Configure WHATSAPP_CLOUD_ACCESS_TOKEN in Replit Secrets or apps/web/.env.local"
+    );
     return;
   }
 
@@ -231,3 +251,34 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+/**
+ * ============================================================
+ * PASOS PARA ACTIVAR EL CEREBRO DE WHATSAPP
+ * ============================================================
+ * 
+ * 1) Obtener tokens:
+ *    - OPENAI_API_KEY: https://platform.openai.com/account/api-keys
+ *    - WHATSAPP_CLOUD_ACCESS_TOKEN: https://developers.facebook.com/apps
+ *      → Selecciona tu app → WhatsApp → Configuration → Permanent Access Token
+ * 
+ * 2) Opción A - Desarrollo local:
+ *    - Abre apps/web/.env.local
+ *    - Sustituye "PEGAR_AQUI_MI_API_KEY_DE_OPENAI" por tu OpenAI key
+ *    - Sustituye "PEGAR_AQUI_MI_TOKEN_DE_WHATSAPP_CLOUD" por tu WhatsApp token
+ *    - Guarda el archivo
+ * 
+ * 3) Opción B - Producción (Replit):
+ *    - Ve a Secrets de Replit (panel derecho del IDE)
+ *    - Crea las variables OPENAI_API_KEY y WHATSAPP_CLOUD_ACCESS_TOKEN
+ *    - Reinicia el proyecto (Ctrl+Shift+P → "Restart project")
+ * 
+ * 4) Prueba:
+ *    - Envía un mensaje de prueba por WhatsApp
+ *    - Revisa la consola del servidor:
+ *      "[ENV DEBUG] WHATSAPP_CLOUD_ACCESS_TOKEN length: XXX" (debe mostrar un número)
+ *      "[WhatsApp Brain] 🧠 OpenAI reply generated: ..." (respuesta de OpenAI)
+ *      "[WhatsApp Brain] ✅ WhatsApp message sent successfully: ..." (confirmación de envío)
+ * 
+ * ============================================================
+ */
