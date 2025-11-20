@@ -2,7 +2,17 @@
 
 ## Overview
 
-This workspace integrates **Axon Core** and **AXON Agency** to form an AI-driven ecosystem for infrastructure management and AI Agency operations. **Axon Core** is a robust backend providing REST API and WebSocket interfaces for managing services, commands, files, and multi-provider LLM integrations with JWT authentication and n8n workflow automation. **AXON Agency** is a full-stack AI Agency platform focusing on campaign management, social media integrations, advanced LLM capabilities (including RAG), autopilots, and analytics, leveraging Axon Core for backend communication. The combined system aims to deliver a scalable, multi-tenant AI solution with advanced agent capabilities and automated project generation.
+This workspace integrates **Axon Core** and **AXON Agency** to form an AI-driven ecosystem for infrastructure management and AI Agency operations.
+
+### Public Landing Page (November 2025)
+
+AXON Agency now features a professional public landing page accessible at the root path (`/`) with:
+- **Route Groups Architecture**: Next.js 15 route groups separate public and authenticated routes
+  - `(public)` route group: Landing page + legal pages (no authentication)
+  - `(auth)` route group: Dashboard + admin panel (requires authentication)
+- **Landing Page**: Hero section, 6 feature cards, footer with WhatsApp contact button
+- **Legal Pages**: Privacy Policy, Terms of Service, Data Deletion instructions
+- **WhatsApp Integration**: Contact button with ENV-configurable phone number and message **Axon Core** is a robust backend providing REST API and WebSocket interfaces for managing services, commands, files, and multi-provider LLM integrations with JWT authentication and n8n workflow automation. **AXON Agency** is a full-stack AI Agency platform focusing on campaign management, social media integrations, advanced LLM capabilities (including RAG), autopilots, and analytics, leveraging Axon Core for backend communication. The combined system aims to deliver a scalable, multi-tenant AI solution with advanced agent capabilities and automated project generation.
 
 ## User Preferences
 
