@@ -113,6 +113,12 @@ async function sendWhatsAppMessage(
       },
     };
 
+    // DEBUG: Log exact payload being sent to WhatsApp
+    console.log(
+      "[WhatsApp Brain] 🔍 Payload to WhatsApp:",
+      JSON.stringify(payload, null, 2)
+    );
+
     const res = await fetch(url, {
       method: "POST",
       headers: {
