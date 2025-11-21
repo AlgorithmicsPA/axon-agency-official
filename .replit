@@ -7,7 +7,7 @@ channel = "stable-25_05"
 packages = ["libxcrypt", "xcodebuild", "zlib"]
 
 [workflows]
-runButton = "Project"
+runButton = "axon-agency-api"
 
 [[workflows.workflow]]
 name = "Project"
@@ -57,6 +57,10 @@ externalPort = 3002
 [[ports]]
 localPort = 8080
 externalPort = 8080
+
+[[ports]]
+localPort = 32849
+externalPort = 3000
 
 [[ports]]
 localPort = 36237
