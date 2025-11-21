@@ -25,6 +25,29 @@ const VERIFY_TOKEN =
  */
 
 /**
+ * Normalize WhatsApp phone numbers for Meta API
+ * 
+ * Meta expects Mexico numbers without the "1" after country code 52.
+ * WhatsApp Cloud API sends: 521XXXXXXXXXX (13 digits)
+ * Meta expects: 52XXXXXXXXXX (12 digits)
+ */
+function normalizeWhatsAppNumberForMeta(raw: string | undefined): string | undefined {
+  if (!raw) return raw;
+  
+  // Mexico case: wa_id arrives as 521 + number, but Meta expects 52 + number
+  if (raw.startsWith("521") && raw.length === 13) {
+    const normalized = "52" + raw.slice(3);
+    console.log(
+      "[WhatsApp Brain] 🔧 Normalized Mexico number:",
+      { original: raw, normalized }
+    );
+    return normalized;
+  }
+  
+  return raw;
+}
+
+/**
  * Generate AI reply using OpenAI Chat Completions
  */
 async function generateReply(userMessage: string): Promise<string> {
@@ -82,9 +105,14 @@ async function generateReply(userMessage: string): Promise<string> {
  */
 async function sendWhatsAppMessage(
   phoneNumberId: string,
-  to: string,
+  to: string | undefined,
   text: string
 ): Promise<void> {
+  if (!to) {
+    console.error("[WhatsApp Brain] ❌ Recipient phone number is undefined");
+    return;
+  }
+
   const token = process.env.WHATSAPP_CLOUD_ACCESS_TOKEN;
   
   // DEBUG: Log token availability (length only, for security)
@@ -236,8 +264,11 @@ export async function POST(req: NextRequest) {
     // Generate AI reply
     const replyText = await generateReply(text);
 
+    // Normalize phone number for Meta API (Mexico: 521... → 52...)
+    const normalizedTo = normalizeWhatsAppNumberForMeta(from);
+
     // Send response back to user
-    await sendWhatsAppMessage(phoneNumberId, from, replyText);
+    await sendWhatsAppMessage(phoneNumberId, normalizedTo, replyText);
 
     console.log(
       "[WhatsApp Webhook] ✅ Message processed successfully",
