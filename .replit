@@ -7,7 +7,7 @@ channel = "stable-25_05"
 packages = ["libxcrypt", "xcodebuild", "zlib"]
 
 [workflows]
-runButton = "Project"
+runButton = "axon-web"
 
 [[workflows.workflow]]
 name = "Project"
@@ -65,10 +65,6 @@ externalPort = 4200
 [[ports]]
 localPort = 38421
 externalPort = 3001
-
-[[ports]]
-localPort = 40069
-externalPort = 3000
 
 [[ports]]
 localPort = 42209
