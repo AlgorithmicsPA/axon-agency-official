@@ -1225,6 +1225,211 @@ python3 migrate_multitenant_phase2.py
 
 ---
 
+## 🚀 Deploy en Axon 88 (Staging/Prod)
+
+Esta sección describe cómo desplegar Axon Agency en un servidor Axon 88 (Jetson Orin o equivalente).
+
+### 1. Preparar servidor y base de datos
+
+#### 1.1 Instalar PostgreSQL
+
+```bash
+sudo apt update
+sudo apt install -y postgresql postgresql-contrib
+```
+
+#### 1.2 Crear usuario y base de datos
+
+```bash
+sudo -u postgres createuser axon -P
+sudo -u postgres createdb axon_agency -O axon
+```
+
+#### 1.3 Probar conexión
+
+```bash
+psql -U axon -d axon_agency -h localhost -c "SELECT 1;"
+```
+
+### 2. Backend (FastAPI – apps/api)
+
+#### 2.1 Preparar entorno
+
+```bash
+cd /home/axon88/projects/axon-agency/apps/api
+cp .env.example .env
+```
+
+#### 2.2 Editar `.env` con valores reales
+
+```bash
+# Ubicación y puerto
+API_HOST=0.0.0.0
+API_PORT=8080
+API_RELOAD=true  # Cambiar a false en producción
+
+# Database
+DATABASE_URL=postgresql+psycopg://axon:TU_PASSWORD@localhost:5432/axon_agency
+
+# JWT Security
+JWT_SECRET=valor-seguro-minimo-32-caracteres
+
+# Mode
+DEV_MODE=false  # CRÍTICO: poner false en producción
+PRODUCTION_MODE=true
+
+# LLM Providers
+OPENAI_API_KEY=sk-proj-...
+GEMINI_API_KEY=AIzaSy...
+
+# Axon 88 Integration
+AXON_CORE_API_BASE=https://api-axon88.algorithmicsai.com
+AXON_CORE_ENABLED=true
+```
+
+#### 2.3 Instalar dependencias
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+#### 2.4 Ejecutar migraciones (si aplica)
+
+```bash
+alembic upgrade head
+```
+
+#### 2.5 Iniciar API
+
+```bash
+uvicorn app.main:socket_app --host 0.0.0.0 --port 8080
+```
+
+#### 2.6 Verificar salud
+
+```bash
+curl http://localhost:8080/api/health
+```
+
+**Respuesta esperada:**
+```json
+{
+  "status": "ok",
+  "database": "connected",
+  "llm": "openai"
+}
+```
+
+### 3. Frontend (Next.js – apps/web)
+
+#### 3.1 Preparar entorno
+
+```bash
+cd /home/axon88/projects/axon-agency/apps/web
+cp .env.local.example .env.local
+```
+
+#### 3.2 Editar `.env.local`
+
+```bash
+# Backend URL (acceso desde navegador)
+NEXT_PUBLIC_API_BASE_URL=http://IP_DE_AXON88:8080
+
+# Axon Core URL
+NEXT_PUBLIC_AXON_CORE_URL=https://api-axon88.algorithmicsai.com
+
+# WhatsApp
+NEXT_PUBLIC_WHATSAPP_PHONE_NUMBER=5219841234567
+```
+
+#### 3.3 Instalar dependencias
+
+```bash
+npm install
+```
+
+#### 3.4 Build y start
+
+**Desarrollo:**
+```bash
+npm run dev  # Acceder en http://localhost:5000
+```
+
+**Producción:**
+```bash
+npm run build
+npm run start -- -p 5000
+```
+
+#### 3.5 Verificar en navegador
+
+```
+http://IP_DE_AXON88:5000
+```
+
+### 4. Reverse Proxy (Nginx/Caddy) – Recomendado
+
+#### 4.1 Configurar Nginx
+
+```nginx
+upstream api_backend {
+  server localhost:8080;
+}
+
+upstream web_frontend {
+  server localhost:5000;
+}
+
+server {
+  listen 80;
+  server_name api.axonagency.mx app.axonagency.mx;
+
+  # API
+  location /api {
+    proxy_pass http://api_backend;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+  }
+
+  # Frontend
+  location / {
+    proxy_pass http://web_frontend;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+  }
+}
+```
+
+### 5. Notas de producción
+
+- ✅ **DEV_MODE MUST BE FALSE** en archivo `.env`
+- ✅ Configurar SSL/TLS con Let's Encrypt
+- ✅ Hacer backup de PostgreSQL antes de desplegar
+- ✅ Configurar systemd services para auto-restart
+- ✅ Monitoreo de logs: `tail -f /path/to/api.log`
+- ✅ Rate limiting en endpoints críticos
+- ✅ CORS configurado correctamente
+
+### 6. Checklist pre-deploy
+
+- [ ] DEV_MODE=false en .env
+- [ ] DATABASE_URL apunta a PostgreSQL real
+- [ ] JWT_SECRET generado y seguro (min 32 chars)
+- [ ] OPENAI_API_KEY válida
+- [ ] npm run build completó sin errores
+- [ ] uvicorn inicia sin errores de conexión
+- [ ] curl a /api/health retorna 200 OK
+- [ ] Frontend carga en navegador sin CORS errors
+- [ ] Login funciona correctamente
+- [ ] Multi-tenancy aislamiento verificado
+
+---
+
 ## 🎯 Conclusion
 
 This production deployment checklist provides a comprehensive guide for safely deploying the AXON Agency multi-tenant system to production. Follow each section carefully, and don't skip any steps.
