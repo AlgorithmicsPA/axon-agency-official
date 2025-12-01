@@ -183,6 +183,327 @@ curl -H "Origin: https://your-production-domain.com" \
 
 ---
 
+## 🚀 Phase 1.5 – Axon 88 Specific Setup
+
+This phase is specifically for deploying AXON Agency on an Axon 88 machine (Jetson Orin or similar) with local PostgreSQL, without DEV_MODE, and with Axon Core integration.
+
+**Estimated Time:** 20-30 minutes (assuming PostgreSQL already installed)
+
+---
+
+### 1.5.1 Minimum Environment Variables for Axon 88
+
+**Backend (`axon-agency/apps/api/.env`):**
+
+```bash
+# ===== CRITICAL FOR PRODUCTION =====
+PRODUCTION_MODE=true
+DEV_MODE=false
+
+# Database (PostgreSQL local)
+DATABASE_URL=postgresql+psycopg://axon:YOUR_SECURE_PASSWORD@localhost:5432/axon_agency
+REDIS_URL=redis://localhost:6379/0
+
+# JWT Security
+JWT_SECRET=<generate-with: openssl rand -base64 48>
+JWT_ISS=axon
+JWT_AUD=control
+JWT_EXPIRATION_MINUTES=1440
+
+# Server
+BIND=0.0.0.0
+PORT=8080
+ALLOWED_ORIGINS=http://YOUR_AXON88_IP:5000
+
+# LLM Providers
+OPENAI_API_KEY=sk-proj-...
+GEMINI_API_KEY=AIzaSy...
+
+# ===== AXON CORE INTEGRATION =====
+AXON_CORE_API_BASE=https://api-axon88.algorithmicsai.com
+AXON_CORE_API_TOKEN=<optional-token-from-axon-core>
+AXON_CORE_ENABLED=true
+
+# ===== OPTIONAL (for later phases) =====
+# N8N_WHATSAPP_DEPLOY_WEBHOOK_URL=https://n8n.example.com/webhook/...
+# TELEGRAM_BOT_TOKEN=<token-from-botfather>
+# AYRSHARE_API_KEY=ayr_...
+```
+
+**Frontend (`axon-agency/apps/web/.env.local`):**
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://YOUR_AXON88_IP:8080
+NEXT_PUBLIC_AXON_CORE_URL=https://api-axon88.algorithmicsai.com
+NEXT_PUBLIC_WHATSAPP_PHONE_NUMBER=52xxxxxxxxxx
+```
+
+---
+
+### 1.5.2 PostgreSQL Setup on Axon 88
+
+**Step 1: Verify PostgreSQL is running**
+
+```bash
+sudo systemctl status postgresql
+# Expected: active (running)
+```
+
+**Step 2: Create database and user**
+
+```bash
+# Login as postgres user
+sudo -u postgres psql
+
+# Inside psql:
+CREATE USER axon WITH PASSWORD 'YOUR_SECURE_PASSWORD';
+CREATE DATABASE axon_agency OWNER axon;
+GRANT ALL PRIVILEGES ON DATABASE axon_agency TO axon;
+\q
+```
+
+**Step 3: Test connection**
+
+```bash
+psql -U axon -d axon_agency -h localhost -c "SELECT 1;"
+# Expected output: 1 (connection successful)
+```
+
+**Checklist:**
+- [ ] PostgreSQL service running: `sudo systemctl status postgresql`
+- [ ] User `axon` created with secure password
+- [ ] Database `axon_agency` created and owned by `axon`
+- [ ] Connection test successful
+
+---
+
+### 1.5.3 Deploy Backend API on Axon 88
+
+**Step 1: Prepare backend directory**
+
+```bash
+cd axon-agency/apps/api
+cp .env.example .env
+
+# Edit .env with real values (see 1.5.1)
+nano .env  # or your preferred editor
+```
+
+**Critical values to verify in .env:**
+- `DATABASE_URL` points to your PostgreSQL ✓
+- `DEV_MODE=false` ✓
+- `PRODUCTION_MODE=true` ✓
+- `JWT_SECRET` is NOT "change-me-in-production" ✓
+- `OPENAI_API_KEY` is set ✓
+- `AXON_CORE_ENABLED=true` ✓
+
+**Step 2: Install Python dependencies**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+**Step 3: Start API server**
+
+```bash
+uvicorn app.main:socket_app --host 0.0.0.0 --port 8080
+```
+
+**Expected output in logs:**
+```
+INFO:     Uvicorn running on http://0.0.0.0:8080
+INFO:     Application startup complete
+```
+
+**Important:** You should NOT see this warning if DEV_MODE is properly disabled:
+```
+⚠️  SECURITY WARNING: DEV_MODE IS ENABLED  ⚠️
+```
+
+**Checklist:**
+- [ ] .env configured with real values
+- [ ] No DEV_MODE warning in logs
+- [ ] Server listening on 0.0.0.0:8080
+- [ ] Python dependencies installed
+
+---
+
+### 1.5.4 Deploy Frontend Web on Axon 88
+
+**Step 1: Prepare frontend directory (new terminal)**
+
+```bash
+cd axon-agency/apps/web
+cp .env.local.example .env.local
+
+# Edit .env.local with correct API URL
+nano .env.local
+```
+
+**Critical values in .env.local:**
+- `NEXT_PUBLIC_API_BASE_URL=http://YOUR_AXON88_IP:8080` ✓
+- `NEXT_PUBLIC_AXON_CORE_URL` matches backend setting ✓
+
+**Step 2: Install dependencies and build**
+
+```bash
+npm install
+
+# Build for production
+npm run build
+```
+
+**Step 3: Start frontend server**
+
+```bash
+npm start -- -p 5000
+```
+
+**Expected output:**
+```
+> next start
+Ready in X.XXs
+Listening on 0.0.0.0:5000
+```
+
+**Checklist:**
+- [ ] .env.local configured with correct API URL
+- [ ] `npm install` successful
+- [ ] `npm run build` completed without errors
+- [ ] Frontend server running on port 5000
+
+---
+
+### 1.5.5 Validation Tests
+
+Run these tests to confirm Axon 88 setup is working.
+
+#### Test 1: API Health Check
+
+```bash
+# From any terminal on Axon 88:
+curl -s http://localhost:8080/api/health | jq .
+
+# Expected response:
+# {
+#   "status": "ok",
+#   "database": "connected",
+#   "time": "..."
+# }
+```
+
+#### Test 2: User Registration + Login + Auth Check
+
+```bash
+# 1. Register admin user
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "email": "admin@axon88.local",
+    "password": "AdminPass123!",
+    "full_name": "Admin User"
+  }'
+
+# Save returned user_id (you'll need to manually set role=admin in database for first user)
+# UPDATE users SET role='admin' WHERE username='admin';
+
+# 2. Login
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "AdminPass123!"
+  }' | jq -r '.access_token')
+
+echo "Token: $TOKEN"
+
+# 3. Verify authentication
+curl -s -X GET http://localhost:8080/api/auth/me \
+  -H "Authorization: Bearer $TOKEN" | jq .
+
+# Expected: User details with role="admin"
+```
+
+#### Test 3: Axon Core Connectivity
+
+```bash
+# If AXON_CORE_ENABLED=true, this checks connectivity to Axon Core:
+curl -s http://localhost:8080/api/axon-core/health | jq .
+
+# Expected if Axon Core is online:
+# {
+#   "status": "connected",
+#   "remote": "https://api-axon88.algorithmicsai.com"
+# }
+
+# Expected if Axon Core is offline (normal for initial setup):
+# {
+#   "status": 503,
+#   "detail": "Axon Core is not reachable"
+# }
+
+# TODO: If you see persistent 503 errors, verify:
+# - AXON_CORE_API_BASE is reachable: curl https://api-axon88.algorithmicsai.com/api/health
+# - AXON_CORE_API_TOKEN is valid (if required by Axon Core)
+```
+
+#### Test 4: Frontend Access
+
+```bash
+# From your browser or curl:
+curl -s http://localhost:5000 | grep -q "AXON" && echo "Frontend OK" || echo "Frontend Error"
+```
+
+**Checklist:**
+- [ ] `GET /api/health` returns 200 OK
+- [ ] Admin user registration successful
+- [ ] Login returns access_token
+- [ ] `GET /api/auth/me` returns user with role=admin
+- [ ] `GET /api/axon-core/health` returns status (connected or 503)
+- [ ] Frontend loads in browser
+
+---
+
+### 1.5.6 Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| **Port 8080/5000 already in use** | `lsof -i :8080` or `lsof -i :5000`, then kill process or use different port |
+| **PostgreSQL connection refused** | Check: `sudo systemctl status postgresql`, verify DATABASE_URL, verify user/password |
+| **JWT_SECRET is default** | Generate new: `openssl rand -base64 48`, update .env, restart API |
+| **Axon Core unreachable (503)** | Expected if Axon Core is offline. Test manually: `curl https://api-axon88.algorithmicsai.com/api/health` |
+| **CORS errors in frontend** | Verify `NEXT_PUBLIC_API_BASE_URL` matches backend IP, restart frontend |
+| **DEV_MODE warning appears** | Set `DEV_MODE=false` in .env, restart API |
+
+---
+
+### 1.5.7 Production Checklist for Axon 88
+
+```bash
+# Pre-deployment validation
+[ ] PostgreSQL running locally on port 5432
+[ ] Database `axon_agency` created and accessible
+[ ] .env in apps/api/ has all required values (no defaults like "change-me")
+[ ] DEV_MODE=false, PRODUCTION_MODE=true
+[ ] JWT_SECRET is 32+ random characters
+[ ] ALLOWED_ORIGINS includes your Axon 88 domain
+[ ] OPENAI_API_KEY configured
+[ ] AXON_CORE_API_BASE configured (can be tested later)
+[ ] .env.local in apps/web/ has correct API URL
+[ ] uvicorn running on 0.0.0.0:8080 (not DEV_MODE warnings)
+[ ] npm start running on 0.0.0.0:5000
+[ ] curl /api/health returns 200 OK
+[ ] curl /api/auth/register works without DEV_MODE
+[ ] curl /api/axon-core/health returns status
+[ ] Frontend loads in browser without errors
+```
+
+---
+
 ## 🛡️ Phase 2: Security Review Summary
 
 ### 2.1 Security Fixes Applied (Phase 5)
