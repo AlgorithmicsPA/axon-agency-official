@@ -12,6 +12,7 @@ from app.providers.gemini import gemini_chat, gemini_chat_stream
 from app.providers.ollama import ollama_chat, ollama_chat_stream
 from app.services.llm_router import get_llm_router
 from app.models.llm import TaskType, LLMResponse, ProviderStatus
+from app.services.super_axon_agent import super_axon_chat_stream, detect_mode
 
 logger = logging.getLogger(__name__)
 
@@ -124,11 +125,29 @@ async def chat_completion(request: ChatRequest):
 
 @router.post("/chat/stream")
 async def chat_completion_stream(request: ChatRequest):
-    """Streaming chat completion."""
+    """Streaming chat completion con Super Axon Agent.
+    
+    Este endpoint usa el Super Axon Agent con:
+    - Prompt de sistema especializado para AXON Agency
+    - Detección automática de modos (estratega/implementador/tutor)
+    - Tags soportados: #estratega, #implementador, #tutor
+    """
     try:
         provider = request.provider or "auto"
         
-        # Auto-select
+        # Detectar modo del mensaje del usuario (para logging)
+        mode = None
+        if request.messages:
+            last_user_msg = None
+            for msg in reversed(request.messages):
+                if msg.get("role") == "user":
+                    last_user_msg = msg.get("content", "")
+                    break
+            if last_user_msg:
+                mode = detect_mode(last_user_msg)
+                logger.info(f"Super Axon Agent: Modo detectado '{mode}' para mensaje del usuario")
+        
+        # Auto-select provider
         if provider == "auto":
             if request.images:
                 provider = "gemini"
@@ -141,14 +160,16 @@ async def chat_completion_stream(request: ChatRequest):
             else:
                 raise HTTPException(status_code=503, detail="No LLM providers configured")
         
-        # Stream based on provider
+        # Stream based on provider usando Super Axon Agent
         if provider == "gemini":
             if not settings.gemini_api_key:
                 raise HTTPException(status_code=503, detail="Gemini not configured")
             
             async def stream_generator():
-                async for chunk in gemini_chat_stream(
+                async for chunk in super_axon_chat_stream(
                     request.messages,
+                    gemini_chat_stream,
+                    mode=mode,
                     model=request.model,
                     images=request.images
                 ):
@@ -161,8 +182,10 @@ async def chat_completion_stream(request: ChatRequest):
                 raise HTTPException(status_code=503, detail="OpenAI not configured")
             
             async def stream_generator():
-                async for chunk in openai_chat_stream(
+                async for chunk in super_axon_chat_stream(
                     request.messages,
+                    openai_chat_stream,
+                    mode=mode,
                     model=request.model
                 ):
                     yield chunk
@@ -174,8 +197,10 @@ async def chat_completion_stream(request: ChatRequest):
                 raise HTTPException(status_code=503, detail="Ollama not enabled")
             
             async def stream_generator():
-                async for chunk in ollama_chat_stream(
+                async for chunk in super_axon_chat_stream(
                     request.messages,
+                    ollama_chat_stream,
+                    mode=mode,
                     model=request.model or settings.ollama_model
                 ):
                     yield chunk
