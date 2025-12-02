@@ -14,14 +14,16 @@ const nextConfig = {
     };
     return config;
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:8080/api/:path*',
-      },
-    ];
-  },
+  // NOTA: Los rewrites están deshabilitados porque el frontend usa API_BASE_URL directamente
+  // Si se necesita proxy, descomentar y ajustar el puerto (8090, no 8080)
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/:path*',
+  //       destination: 'http://localhost:8090/api/:path*',
+  //     },
+  //   ];
+  // },
 };
 
 export default nextConfig;

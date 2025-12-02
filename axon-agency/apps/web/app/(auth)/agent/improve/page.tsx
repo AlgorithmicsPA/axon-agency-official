@@ -99,8 +99,8 @@ export default function ImprovePage() {
 
   const loadJobs = async () => {
     try {
-      const res = await api.get("/api/improve/jobs");
-      setJobs(res.data.jobs || []);
+      const res = await api.get<{ jobs: any[] }>("/api/improve/jobs");
+      setJobs(res.jobs || []);
     } catch (error: any) {
       if (error?.response?.status === 403 || error?.response?.status === 401) {
         console.log("Autenticación requerida - jobs list vacía");
@@ -115,11 +115,15 @@ export default function ImprovePage() {
     setAnalyzing(true);
     try {
       console.log("Loading architecture from /api/self-improve/structure...");
-      const res = await api.get("/api/self-improve/structure");
-      console.log("Architecture response:", res.data);
+      const res = await api.get<{
+        files: Record<string, any>;
+        dependency_graph: Record<string, string[]>;
+        stats?: { total_files?: number; total_loc?: number };
+      }>("/api/self-improve/structure");
+      console.log("Architecture response:", res);
       
-      const files = res.data.files || {};
-      const depGraph = res.data.dependency_graph || {};
+      const files = res.files || {};
+      const depGraph = res.dependency_graph || {};
       
       const nodes = Object.entries(files).map(([path, data]: [string, any]) => ({
         name: path.split('/').pop() || path,
@@ -145,8 +149,8 @@ export default function ImprovePage() {
       const archDataObj = {
         nodes,
         edges,
-        total_files: res.data.stats?.total_files || nodes.length,
-        total_loc: res.data.stats?.total_loc || nodes.reduce((sum, n) => sum + n.loc, 0),
+        total_files: res.stats?.total_files || nodes.length,
+        total_loc: res.stats?.total_loc || nodes.reduce((sum, n) => sum + n.loc, 0),
         avg_complexity: avgComplexity,
       };
       
@@ -164,9 +168,9 @@ export default function ImprovePage() {
   const analyzeAndSuggest = async () => {
     setAnalyzing(true);
     try {
-      const res = await api.post("/api/improve/jobs/analyze");
+      const res = await api.post<{ jobs_created?: number }>("/api/improve/jobs/analyze");
       await loadJobs();
-      showToast(`✅ Análisis completo. ${res.data.jobs_created || 0} mejoras sugeridas.`, "success");
+      showToast(`✅ Análisis completo. ${res.jobs_created || 0} mejoras sugeridas.`, "success");
     } catch (error: any) {
       console.error("Error analyzing:", error);
       if (error?.response?.status === 403 || error?.response?.status === 401) {
@@ -224,7 +228,7 @@ export default function ImprovePage() {
 
   const cleanupJob = async (jobId: string) => {
     try {
-      await api.delete(`/api/improve/jobs/${jobId}/cleanup`);
+      await api.del(`/api/improve/jobs/${jobId}/cleanup`);
       await loadJobs();
     } catch (error) {
       console.error("Error cleaning up job:", error);
@@ -331,7 +335,7 @@ export default function ImprovePage() {
             <div className="bg-card border border-border rounded-lg p-8 text-center text-muted-foreground">
               <Sparkles size={48} className="mx-auto mb-4 opacity-50" />
               <p>No hay mejoras pendientes</p>
-              <p className="text-sm mt-2">Haz clic en "Analizar y Sugerir" para empezar</p>
+              <p className="text-sm mt-2">Haz clic en &quot;Analizar y Sugerir&quot; para empezar</p>
             </div>
           ) : (
             <div className="space-y-3">

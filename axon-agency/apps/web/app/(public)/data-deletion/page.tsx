@@ -16,7 +16,7 @@ export default function DataDeletionPage() {
         <h2>2. Cómo solicitar la eliminación</h2>
         <p>Para solicitar la eliminación de datos personales, el usuario puede elegir cualquiera de las siguientes opciones:</p>
         <ul>
-          <li>Enviar un correo electrónico a: <a href="mailto:contacto@axonagency.mx">contacto@axonagency.mx</a> con el asunto "Solicitud de eliminación de datos".</li>
+          <li>Enviar un correo electrónico a: <a href="mailto:contacto@axonagency.mx">contacto@axonagency.mx</a> con el asunto &quot;Solicitud de eliminación de datos&quot;.</li>
           <li>Enviar un mensaje por WhatsApp al número oficial de Axon Agency indicando claramente que desea ejercer su derecho de eliminación de datos.</li>
         </ul>
 

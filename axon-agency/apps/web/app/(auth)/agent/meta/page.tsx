@@ -136,7 +136,7 @@ function MetaAgentContent() {
     if (!confirmed) return;
 
     try {
-      await api.delete(`/api/agent/meta/agents/${agentId}`);
+      await api.del(`/api/agent/meta/agents/${agentId}`);
       showToast("Agente eliminado exitosamente", "success");
       await loadData();
     } catch (error: any) {

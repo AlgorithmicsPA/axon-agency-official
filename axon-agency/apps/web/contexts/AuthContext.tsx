@@ -43,18 +43,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Maneja el caso de respuestas sin cuerpo para evitar el error "Unexpected end of JSON input"
+  // cuando el servidor devuelve una respuesta vacía o no-JSON (ej: 401/403 sin body)
   const fetchUser = async () => {
+    setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/me", {
+      // Usar API_BASE_URL directamente para evitar problemas con rewrites
+      const apiBaseUrl = typeof window !== "undefined" 
+        ? (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8090")
+        : "http://localhost:8090";
+      const url = `${apiBaseUrl.replace(/\/$/, "")}/api/auth/me`;
+      
+      const res = await fetch(url, {
         credentials: "include",
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data);
-      } else {
+      if (!res.ok) {
         setUser(null);
+        return;
       }
+
+      // Leer el cuerpo como texto primero para manejar respuestas vacías
+      const text = await res.text();
+      if (!text) {
+        setUser(null);
+        return;
+      }
+
+      // Intentar parsear JSON solo si hay contenido
+      const data = JSON.parse(text);
+      setUser(data);
     } catch (error) {
       console.error("Error fetching user:", error);
       setUser(null);

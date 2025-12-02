@@ -6,6 +6,10 @@ node_modules/
 .next/
 **/.next/
 out/
+next
+**/next
+axon-agency-web@*/
+**/axon-agency-web@*/
 
 # Python
 __pycache__/

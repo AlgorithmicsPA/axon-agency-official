@@ -15,8 +15,8 @@ export default function WhatsAppPage() {
 
   const fetchStatus = async () => {
     try {
-      const res = await api.get("/api/integrations/whatsapp/status");
-      setStatus(res.data);
+      const res = await api.get<any>("/api/integrations/whatsapp/status");
+      setStatus(res);
     } catch (error) {
       console.error("Error fetching WhatsApp status:", error);
     }

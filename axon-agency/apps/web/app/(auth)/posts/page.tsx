@@ -20,8 +20,8 @@ export default function PostsPage() {
 
   const fetchPosts = async () => {
     try {
-      const res = await api.get("/api/posts/list");
-      setPosts(res.data.items || []);
+      const res = await api.get<{ items: any[] }>("/api/posts/list");
+      setPosts(res.items || []);
     } catch (error) {
       console.error("Error fetching posts:", error);
     }

@@ -115,20 +115,28 @@ export default function NewProjectPage() {
     if (!result) return;
 
     try {
-      const res = await api.post(
-        `/api/projects/generate/${result.project_id}/download`,
-        result,
-        { responseType: "blob" }
-      );
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8090";
+      const url = `${baseUrl}/api/projects/generate/${result.project_id}/download`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(result),
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
 
       // Create download link
-      const blob = new Blob([res.data], { type: "application/zip" });
-      const url = URL.createObjectURL(blob);
+      const blob = await res.blob();
+      const downloadUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = downloadUrl;
       a.download = `${result.project_id}.zip`;
       a.click();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error("Download failed:", error);
       showToast("Error al descargar el proyecto", "error");

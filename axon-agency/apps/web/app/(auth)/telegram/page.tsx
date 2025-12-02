@@ -15,8 +15,8 @@ export default function TelegramPage() {
 
   const fetchStatus = async () => {
     try {
-      const res = await api.get("/api/integrations/telegram/status");
-      setStatus(res.data);
+      const res = await api.get<any>("/api/integrations/telegram/status");
+      setStatus(res);
     } catch (error) {
       console.error("Error fetching Telegram status:", error);
     }

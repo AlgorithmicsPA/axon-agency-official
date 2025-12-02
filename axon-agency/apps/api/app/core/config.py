@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     dev_mode: bool = False  # Must be explicitly enabled for development
     
     # CORS
-    allowed_origins: str = "http://localhost:3000"
+    allowed_origins: str = "http://localhost:3000,http://localhost:5200,http://127.0.0.1:5200,http://192.168.200.32:5200"
     
     @field_validator("allowed_origins")
     @classmethod

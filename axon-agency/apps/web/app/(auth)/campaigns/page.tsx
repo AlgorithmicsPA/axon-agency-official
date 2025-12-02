@@ -19,8 +19,8 @@ export default function CampaignsPage() {
 
   const fetchCampaigns = async () => {
     try {
-      const res = await api.get("/api/campaigns/list");
-      setCampaigns(res.data.items || []);
+      const res = await api.get<{ items: any[] }>("/api/campaigns/list");
+      setCampaigns(res.items || []);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
     }

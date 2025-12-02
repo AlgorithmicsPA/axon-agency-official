@@ -20,27 +20,28 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
+      // ApiClient devuelve directamente el tipo T, no un objeto con 'data'
       const [metricsRes, campaignsRes, conversationsRes] = await Promise.all([
-        api.get("/api/metrics").catch(() => ({ data: null })),
-        api.get("/api/campaigns/list").catch(() => ({ data: { items: [] } })),
-        api.get("/api/conversations/list").catch(() => ({ data: { items: [] } })),
+        api.get("/api/metrics").catch(() => null),
+        api.get<{ items: any[] }>("/api/campaigns/list").catch(() => ({ items: [] })),
+        api.get<{ items: any[] }>("/api/conversations/list").catch(() => ({ items: [] })),
       ]);
 
-      if (metricsRes.data) {
-        setMetrics(metricsRes.data);
+      if (metricsRes) {
+        setMetrics(metricsRes);
         setMetricsHistory(prev => {
           const newHistory = [...prev, {
             time: new Date().toLocaleTimeString(),
-            cpu: metricsRes.data.cpu.percent,
-            memory: metricsRes.data.memory.percent,
-            disk: metricsRes.data.disk.percent
+            cpu: metricsRes.cpu?.percent || 0,
+            memory: metricsRes.memory?.percent || 0,
+            disk: metricsRes.disk?.percent || 0
           }];
           return newHistory.slice(-10);
         });
       }
 
-      setCampaigns(campaignsRes.data.items || []);
-      setConversations(conversationsRes.data.items || []);
+      setCampaigns(campaignsRes?.items || []);
+      setConversations(conversationsRes?.items || []);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     }

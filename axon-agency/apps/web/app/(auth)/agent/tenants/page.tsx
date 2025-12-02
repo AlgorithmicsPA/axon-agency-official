@@ -31,8 +31,8 @@ export default function TenantsListPage() {
     setError(null);
 
     try {
-      const response = await api.get("/api/tenants");
-      setTenants(response.data);
+      const response = await api.get<any[]>("/api/tenants");
+      setTenants(response);
     } catch (err: any) {
       setError(err.response?.data?.detail || "Failed to load tenants");
     } finally {

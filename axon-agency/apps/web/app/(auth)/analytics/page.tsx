@@ -17,12 +17,12 @@ export default function AnalyticsPage() {
   const fetchData = async () => {
     try {
       const [campaignsRes, conversationsRes] = await Promise.all([
-        api.get("/api/campaigns/list").catch(() => ({ data: { items: [] } })),
-        api.get("/api/conversations/list").catch(() => ({ data: { items: [] } })),
+        api.get<{ items: any[] }>("/api/campaigns/list").catch(() => ({ items: [] })),
+        api.get<{ items: any[] }>("/api/conversations/list").catch(() => ({ items: [] })),
       ]);
 
-      setCampaigns(campaignsRes.data.items || []);
-      setConversations(conversationsRes.data.items || []);
+      setCampaigns(campaignsRes?.items || []);
+      setConversations(conversationsRes?.items || []);
     } catch (error) {
       console.error("Error fetching analytics data:", error);
     }

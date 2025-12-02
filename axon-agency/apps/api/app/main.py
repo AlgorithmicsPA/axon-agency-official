@@ -97,7 +97,7 @@ app.mount("/media", StaticFiles(directory=settings.storage_root + "/media"), nam
 
 app.include_router(health.router, tags=["Health"])
 app.include_router(catalog.router, prefix="/api/catalog", tags=["Catalog"])
-app.include_router(metrics.router, tags=["Metrics"])
+app.include_router(metrics.router, prefix="/api", tags=["Metrics"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(agent.router, prefix="/api/agent", tags=["Agent"])
 app.include_router(media.router, prefix="/api/media", tags=["Media"])

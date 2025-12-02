@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useApiClient, streamChat } from "@/lib/api";
-import { getSocket } from "@/lib/ws";
 import { Mic, MicOff, Send, Sparkles, Undo2, Info } from "lucide-react";
 import { useToast } from "@/components/Toast";
 import { useChatSessions } from "@/lib/hooks/useChatSessions";
@@ -151,12 +150,17 @@ export default function AgentPage() {
           showToast("Usando modo normal...", "info");
           
           try {
-            const res = await api.post("/api/agent/chat", { 
+            const res = await api.post<{
+              output: string;
+              session_url?: string;
+              type?: string;
+              provider?: string;
+            }>("/api/agent/chat", { 
               text: userInput,
               session_id: currentSessionId 
             });
             
-            const assistantContent = res.data.output;
+            const assistantContent = res.output;
             
             setDisplayMessages((prev) => {
               const updated = [...prev];
@@ -165,24 +169,24 @@ export default function AgentPage() {
                 updated[assistantIndex] = {
                   role: "assistant",
                   content: assistantContent,
-                  session_url: res.data.session_url,
-                  type: res.data.type,
+                  session_url: res.session_url,
+                  type: res.type,
                   streaming: false,
                   timestamp: new Date().toISOString(),
-                  meta: { provider: res.data.provider }
+                  meta: { provider: res.provider }
                 };
               }
               return updated;
             });
             
             await saveMessage(currentSessionId, "assistant", assistantContent, {
-              provider: res.data.provider,
-              type: res.data.type,
-              session_url: res.data.session_url
+              provider: res.provider,
+              type: res.type,
+              session_url: res.session_url
             });
             loadSessions();
             
-            if (res.data.type === "autonomous_session") {
+            if (res.type === "autonomous_session") {
               showToast("Sesión autónoma iniciada", "success");
             }
             
@@ -224,20 +228,25 @@ export default function AgentPage() {
     setIsImproving(true);
     
     try {
-      const res = await api.post("/api/prompt/improve", {
+      const res = await api.post<{
+        improved: string;
+        changes: string[];
+        reasoning: string;
+        provider: string;
+      }>("/api/prompt/improve", {
         text: input,
       });
 
-      setInput(res.data.improved);
+      setInput(res.improved);
       setImprovementInfo({
-        changes: res.data.changes || [],
-        reasoning: res.data.reasoning || "",
-        provider: res.data.provider || "unknown",
+        changes: res.changes || [],
+        reasoning: res.reasoning || "",
+        provider: res.provider || "unknown",
       });
       
-      showToast(`✨ Mensaje mejorado con ${res.data.provider}`, "success");
+      showToast(`✨ Mensaje mejorado con ${res.provider}`, "success");
       
-      if (res.data.changes && res.data.changes.length > 0) {
+      if (res.changes && res.changes.length > 0) {
         setShowImprovementDetails(true);
         setTimeout(() => setShowImprovementDetails(false), 5000);
       }
@@ -246,7 +255,9 @@ export default function AgentPage() {
       
       setLoading(true);
       try {
-        const fallbackRes = await api.post("/api/llm/chat", {
+        const fallbackRes = await api.post<{
+          content: string;
+        }>("/api/llm/chat", {
           messages: [
             {
               role: "user",
@@ -256,7 +267,7 @@ export default function AgentPage() {
           provider: "auto",
         });
 
-        setInput(fallbackRes.data.content);
+        setInput(fallbackRes.content);
         showToast("Mensaje mejorado (método alternativo)", "success");
       } catch (fallbackError) {
         console.error("Fallback improve error:", fallbackError);
@@ -347,10 +358,10 @@ export default function AgentPage() {
           formData.append('audio', audioBlob);
           
           try {
-            const res = await api.post('/api/agent/stt', formData, {
+            const res = await api.post<{ text: string }>('/api/agent/stt', formData, {
               headers: { 'Content-Type': 'multipart/form-data' }
             });
-            setInput(res.data.text);
+            setInput(res.text);
             showToast("Texto capturado (backend STT)", "success");
           } catch (error) {
             console.error("STT error:", error);

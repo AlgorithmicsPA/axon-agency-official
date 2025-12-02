@@ -58,8 +58,8 @@ export default function OrdersListPage() {
     setError(null);
     
     try {
-      const response = await api.get("/api/orders");
-      setOrders(response.data);
+      const response = await api.get<any[]>("/api/orders");
+      setOrders(response);
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const error = err as { response?: { data?: { detail?: string } } };

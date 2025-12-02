@@ -9,7 +9,7 @@ import {
   Users, UsersRound, BookOpen, Network, Settings, BarChart3, User, Code, Sparkles, TrendingUp, Activity, Store, Factory, Building, Wifi, Package
 } from "lucide-react";
 
-// MVP Estable - Menú filtrado para funcionalidades core
+// AXON Agency Completo - Todas las funcionalidades activas
 const menuItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/agent", label: "Super Axon Agent", icon: MessageSquare },
@@ -17,30 +17,30 @@ const menuItems = [
   { href: "/agent/factory", label: "Fábrica de Agentes", icon: Factory, adminOnly: true },
   { href: "/agent/tenants", label: "Tenants", icon: Building, adminOnly: true },
   { href: "/agent/integrations", label: "Estado de Integraciones", icon: Wifi, adminOnly: true },
+  { href: "/agent/autonomous", label: "Agente Autónomo", icon: Activity },
+  { href: "/agent/meta", label: "Meta-Agente", icon: Users },
+  { href: "/agent/improve", label: "Mejoras Autónomas", icon: TrendingUp },
+  { href: "/agent/leads", label: "Leads Sales Agent", icon: Users, adminOnly: true },
+  { href: "/agent/catalog", label: "Catálogo Autopilots", icon: Package, adminOnly: true },
+  { href: "/agent/orders", label: "Órdenes", icon: CreditCard, adminOnly: true },
   { href: "/whatsapp", label: "WhatsApp Config", icon: Phone },
   { href: "/telegram", label: "Telegram Config", icon: MessageSquareMore },
   { href: "/rag", label: "Conocimiento RAG", icon: BookOpen },
   { href: "/playground", label: "Code Playground", icon: Code },
+  { href: "/projects/new", label: "Generar Proyecto IA", icon: Sparkles },
+  { href: "/campaigns", label: "Campañas", icon: Megaphone },
+  { href: "/posts", label: "Publicaciones", icon: FileText },
+  { href: "/media", label: "Galería de Medios", icon: Image },
+  { href: "/conversations", label: "Conversaciones", icon: MessageCircle },
+  { href: "/comments", label: "Comentarios", icon: MessageCircle },
+  { href: "/autopilots", label: "Autopilots IA", icon: Bot },
   { href: "/analytics", label: "Analíticas", icon: BarChart3 },
+  { href: "/memberships", label: "Membresías", icon: CreditCard },
+  { href: "/partners", label: "Asociados", icon: Users },
+  { href: "/team", label: "Mi Equipo", icon: UsersRound },
+  { href: "/networks", label: "Redes Conectadas", icon: Network },
   { href: "/settings", label: "Configuración", icon: Settings },
   { href: "/profile", label: "Mi Perfil", icon: User },
-  // Experimental features - ocultas en MVP
-  // { href: "/agent/autonomous", label: "Agente Autónomo", icon: Activity },
-  // { href: "/agent/meta", label: "Meta-Agente", icon: Users },
-  // { href: "/agent/improve", label: "Mejoras Autónomas", icon: TrendingUp },
-  // { href: "/agent/leads", label: "Leads Sales Agent", icon: Users, adminOnly: true },
-  // { href: "/agent/catalog", label: "Catálogo Autopilots", icon: Package, adminOnly: true },
-  // { href: "/projects/new", label: "Generar Proyecto IA", icon: Sparkles },
-  // { href: "/campaigns", label: "Campañas", icon: Megaphone },
-  // { href: "/posts", label: "Publicaciones", icon: FileText },
-  // { href: "/media", label: "Galería de Medios", icon: Image },
-  // { href: "/conversations", label: "Conversaciones", icon: MessageCircle },
-  // { href: "/comments", label: "Comentarios", icon: MessageCircle },
-  // { href: "/autopilots", label: "Autopilots IA", icon: Bot },
-  // { href: "/memberships", label: "Membresías", icon: CreditCard },
-  // { href: "/partners", label: "Asociados", icon: Users },
-  // { href: "/team", label: "Mi Equipo", icon: UsersRound },
-  // { href: "/networks", label: "Redes Conectadas", icon: Network },
 ];
 
 export function Sidebar() {

@@ -125,8 +125,8 @@ export default function IntegrationsHealthPage() {
     setRefreshing(true);
     setError(null);
     try {
-      const res = await api.get("/api/integrations/health");
-      setHealth(res.data);
+      const res = await api.get<any>("/api/integrations/health");
+      setHealth(res);
     } catch (err: any) {
       console.error("Error fetching health:", err);
       setError(err.response?.data?.detail || "Failed to fetch integration health");

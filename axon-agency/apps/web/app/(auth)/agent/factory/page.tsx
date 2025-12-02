@@ -66,9 +66,12 @@ export default function FactoryDashboardPage() {
   const handleSeedDemo = async () => {
     setSeeding(true);
     try {
-      const response = await api.post("/api/admin/seed-demo");
+      const response = await api.post<{
+        tenants_created: number;
+        orders_created: number;
+      }>("/api/admin/seed-demo");
       showToast(
-        `Demo data created: ${response.data.tenants_created} tenants, ${response.data.orders_created} orders`,
+        `Demo data created: ${response.tenants_created} tenants, ${response.orders_created} orders`,
         "success"
       );
       await fetchData();

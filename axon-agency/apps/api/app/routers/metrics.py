@@ -7,7 +7,7 @@ from app.core.security import get_current_user
 router = APIRouter()
 
 
-@router.get("/api/metrics")
+@router.get("/metrics")
 async def get_metrics(current_user = Depends(get_current_user)):
     """Get system metrics (requires authentication)."""
     return {

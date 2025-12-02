@@ -23,8 +23,8 @@ export default function MediaPage() {
 
   const fetchMedia = async () => {
     try {
-      const res = await api.get("/api/media/list");
-      setMedia(res.data.items || []);
+      const res = await api.get<{ items: any[] }>("/api/media/list");
+      setMedia(res.items || []);
     } catch (error) {
       console.error("Error fetching media:", error);
     }
@@ -59,7 +59,7 @@ export default function MediaPage() {
     if (!confirmed) return;
 
     try {
-      await api.delete(`/api/media/${id}`);
+      await api.del(`/api/media/${id}`);
       fetchMedia();
     } catch (error) {
       console.error("Error deleting media:", error);

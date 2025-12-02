@@ -115,7 +115,7 @@ export function TenantForm({ tenant, onUpdate }: TenantFormProps) {
     setError(null);
 
     try {
-      await api.delete(`/api/tenants/${tenant.id}`);
+      await api.del(`/api/tenants/${tenant.id}`);
       router.push("/agent/tenants");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Failed to delete tenant");
@@ -298,7 +298,7 @@ export function TenantForm({ tenant, onUpdate }: TenantFormProps) {
                     Delete Tenant?
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-slate-400">
-                    This will permanently delete the tenant "{tenant.name}".
+                    This will permanently delete the tenant &quot;{tenant.name}&quot;.
                     Orders associated with this tenant will remain but will have
                     their tenant_id set to null. This action cannot be undone.
                   </AlertDialogDescription>

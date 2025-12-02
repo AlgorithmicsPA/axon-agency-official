@@ -2,25 +2,24 @@
 
 import { useRef, useState } from "react";
 import { useToast } from "@/components/Toast";
+import { useApiClient } from "@/lib/api";
 
 export default function RAGTrainerDashboard() {
   const { showToast } = useToast();
-  const API_BASE = "/api";
+  const api = useApiClient();
 
+  // Usar useApiClient para consistencia con el resto de la app
   async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-    const url = `${API_BASE}${path}`;
-    const res = await fetch(url, {
-      ...opts,
-      headers: {
-        Accept: "application/json",
-        ...(opts?.headers || {}),
-      },
-    });
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`HTTP ${res.status} → ${txt}`);
+    // useApiClient ya maneja la base URL y headers
+    if (opts?.method === "GET" || !opts?.method) {
+      return api.get<T>(path);
+    } else if (opts.method === "POST") {
+      const body = opts.body ? JSON.parse(opts.body as string) : undefined;
+      return api.post<T>(path, body);
+    } else if (opts.method === "DELETE") {
+      return api.del<T>(path);
     }
-    return res.json();
+    throw new Error(`Método ${opts.method} no soportado`);
   }
 
   function Section({

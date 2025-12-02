@@ -16,8 +16,8 @@ export default function ConversationsPage() {
 
   const fetchConversations = async () => {
     try {
-      const res = await api.get("/api/conversations/list");
-      const items = res.data.items || [];
+      const res = await api.get<{ items: any[] }>("/api/conversations/list");
+      const items = res.items || [];
       setConversations(items);
       
       const uniqueSessions = [...new Set(items.map((c: any) => c.session_id))] as string[];

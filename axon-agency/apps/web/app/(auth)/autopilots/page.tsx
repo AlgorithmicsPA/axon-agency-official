@@ -17,8 +17,8 @@ export default function AutopilotsPage() {
 
   const fetchAutopilots = async () => {
     try {
-      const res = await api.get("/api/autopilots/list");
-      setAutopilots(res.data.items || []);
+      const res = await api.get<{ items: any[] }>("/api/autopilots/list");
+      setAutopilots(res.items || []);
     } catch (error) {
       console.error("Error fetching autopilots:", error);
     }

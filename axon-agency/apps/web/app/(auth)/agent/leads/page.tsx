@@ -76,8 +76,8 @@ function LeadsPageContent() {
 
     try {
       const response = await api.get<LeadsResponse>(`/api/leads/list?limit=${limit}&skip=${skip}`);
-      setLeads(response.data.leads);
-      setTotal(response.data.total);
+      setLeads(response.leads);
+      setTotal(response.total);
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const error = err as { response?: { status?: number; data?: { detail?: string } } };
